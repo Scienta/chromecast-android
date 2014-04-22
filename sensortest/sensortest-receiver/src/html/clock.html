@@ -1,0 +1,179 @@
+<html>
+ <head>
+   <script type="text/javascript"
+      src="https://www.gstatic.com/cast/sdk/libs/receiver/2.0.0/cast_receiver.js">
+   </script> 
+ </head>
+ <body>
+ 
+  <script type="text/javascript" src="https://googledrive.com/host/0BxWiy6YBTHXXS0M3X0dubnpjMUE/jquery-1.11.0.min.js"></script>
+  
+  <script type="application/x-javascript">
+    var coords = {x : 300, y : 300};
+    
+    var log="messages";
+    
+    function draw(id) {
+    var canvas = document.getElementById(id);
+    if (canvas.getContext) {
+        var ctx = canvas.getContext("2d");
+    var cx=canvas.width;
+    var cy=canvas.height;
+    
+    var s=100;    
+    ctx.clearRect(0,0,cx,cy);
+
+    ctx.strokeStyle = 'rgb(0,0,0)';
+    ctx.fillStyle = 'rgb(200,200,200)';
+    ctx.beginPath();
+    ctx.arc(coords.x,coords.y,s,0,2*Math.PI,true);
+    ctx.fill();
+
+    ctx.fillStyle = 'rgb(100,100,100)';
+    ctx.beginPath();
+    ctx.arc(coords.x,coords.y,s/20,0,2*Math.PI,true);
+    ctx.fill();
+
+    // Hour ticks
+    r=s*0.9;
+    ctx.lineWidth=s/25;
+    for (x = 0; x <= 11; x++) {
+        ctx.beginPath();
+        angle=x/12;
+        ctx.moveTo(getX(coords.x,s,angle), getY(coords.y,s,angle));
+        ctx.lineTo(getX(coords.x,r,angle), getY(coords.y,r,angle));
+        ctx.stroke();
+    }
+
+    // Minute ticks
+    r=s*0.95;    
+    ctx.lineWidth=s/50;
+    for (x = 0; x <= 60; x++) {
+        ctx.beginPath();
+        angle=x/60;
+        ctx.moveTo(getX(coords.x,s,angle), getY(coords.y,s,angle));
+        ctx.lineTo(getX(coords.x,r,angle), getY(coords.y,r,angle));
+        ctx.stroke();
+    }
+
+    // Seconds pointer
+    var currentTime = new Date()
+    var sec=currentTime.getSeconds()+(currentTime.getMilliseconds() % 1000)/1000;
+    ctx.lineWidth=s/100;
+    ctx.beginPath();
+    var angle=sec/60;
+    ctx.moveTo(getX(coords.x,s/10,angle+0.5),getY(coords.y,s/10,angle+0.5));
+    ctx.lineTo(getX(coords.x,s*0.85,angle),getY(coords.y,s*0.85,angle));
+    ctx.stroke();
+
+    // Minutes pointer
+    var m=currentTime.getMinutes();
+    ctx.lineWidth=s/40;
+    ctx.beginPath();
+    var angle=m/60+sec/3600;
+    ctx.moveTo(getX(coords.x,s/10,angle+0.5),getY(coords.y,s/10,angle+0.5));
+    ctx.lineTo(getX(coords.x,s*0.83,angle),getY(coords.y,s*0.83,angle));
+    ctx.stroke();
+
+    // Hours pointer
+    var h=currentTime.getHours();
+    ctx.beginPath();
+    var angle=(h+m/60+sec/3600)/12;
+    ctx.lineWidth=s/20;
+    ctx.moveTo(getX(coords.x,s/10,angle+0.5),getY(coords.y,s/10,angle+0.5));
+    ctx.lineTo(getX(coords.x,s*0.6,angle),getY(coords.y,s*0.6,angle));
+    ctx.stroke();
+      }
+      ctx.lineWidth=0;
+
+      var th=format(currentTime.getHours());
+      var tm=format(currentTime.getMinutes());
+      var ts=format(currentTime.getSeconds());
+      var digi = document.getElementById('digital');
+      digi.innerHTML=th+":"+tm+":"+ts+":("+coords.x+","+coords.y+")";
+
+      ctx.fillText(log, 100, 100);
+
+
+      setTimeout ( "draw('"+id+"')", 100 );
+      
+    }
+
+
+    function format(s) {
+        if (s<10) {
+          return '0'+s;
+        } else {
+          return ''+s;
+        }
+    }
+
+    function getX(center,radius, angle) {
+    return center+radius*Math.sin(angle*2*Math.PI);
+    }
+
+    function getY(center,radius, angle) {
+    return center-radius*Math.cos(angle*2*Math.PI);
+    }
+    
+    
+    
+    
+    
+    function setupCast() {
+        log="setting up cast";
+    
+        cast.receiver.logger.setLevelValue(0);
+        
+        window.castReceiverManager = cast.receiver.CastReceiverManager.getInstance();
+        
+        
+        castReceiverManager.onReady = function(event) {
+          window.castReceiverManager.setApplicationState("Application status is ready...");
+        };
+        
+        castReceiverManager.onSenderConnected = function(event) {
+          console.log('Received Sender Connected event: ' + event.data);
+          console.log(window.castReceiverManager.getSender(event.data).userAgent);
+        };
+                
+        castReceiverManager.onSenderDisconnected = function(event) {
+          console.log('Received Sender Disconnected event: ' + event.data);
+          if (window.castReceiverManager.getSenders().length == 0) {
+            window.close();
+          }
+        };
+        
+        castReceiverManager.onSystemVolumeChanged = function(event) {
+          console.log('Received System Volume Changed event: ' + event.data['level'] + ' ' + event.data['muted']);
+        };
+        
+        window.messageBus = window.castReceiverManager.getCastMessageBus('urn:x-cast:no.scienta.sensortest');
+        
+        window.messageBus.onMessage = function(event) {
+			coords=jQuery.parseJSON( event.data );
+			log="Got event: "+event.data;
+        }
+        
+        castReceiverManager.start({maxInactivity: 600});        
+        
+        log="made onMessage function";
+    }
+    
+   window.onload = function() {
+    	draw('canvas');
+    	setupCast();    	
+    }
+  </script>
+  
+   <table>
+   <tr>
+     <td><canvas id="canvas" width="600" height="600"/></td>
+   </tr>
+   <tr>
+     <td><center><span class="num" id="digital">*</span></center></td>
+   </tr>
+   </table>
+
+ </body>
+</html>
