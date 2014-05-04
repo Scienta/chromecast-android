@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pong</title>
+    <script type="text/javascript" src="https://www.gstatic.com/cast/sdk/libs/receiver/2.0.0/cast_receiver.js"></script>
+    <style>
+        body {
+        padding: 0;
+        margin: 0;
+        overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<audio preload="true" id="collide">
+    <source src="hit.mp3"/>
+    <source src="hit.wav"/>
+</audio>
+
+<script>
+
+window.onload = function () {
+    console.log("onload");
+    cast.receiver.logger.setLevelValue(0);
+    window.castReceiverManager = cast.receiver.CastReceiverManager.getInstance();
+
+
+    window.castReceiverManager.onReady = function(event) {
+        console.log("onReady");
+        window.castReceiverManager.setApplicationState("Application status is ready...");
+    };
+
+    window.castReceiverManager.onSenderConnected = function(event) {
+        console.log('Received Sender Connected event: ' + event.data);
+        console.log(window.castReceiverManager.getSender(event.data).userAgent);
+    };
+
+    window.castReceiverManager.onSenderDisconnected = function(event) {
+        console.log('Received Sender Disconnected event: ' + event.data);
+        if (window.castReceiverManager.getSenders().length == 0) {
+            window.close();
+        }
+    };
+
+    window.castReceiverManager.onSystemVolumeChanged = function(event) {
+        console.log('Received System Volume Changed event: ' + event.data['level'] + ' ' + event.data['muted']);
+    };
+
+    window.messageBus = window.castReceiverManager.getCastMessageBus('urn:x-cast:no.scienta.pong');
+
+    window.messageBus.onMessage = function (event) {
+        pitchDegrees = JSON.parse(event.data).pitch;
+        console.log(pitchDegrees);
+
+        // Move the paddles on mouse move
+        for (var i = 1; i < paddles.length; i++) {
+            paddles[i].y = (H/2 + pitchDegrees) - paddles[i].h / 2;
+        }
+    };
+
+    window.castReceiverManager.start();
+    console.log("started");
+};
+
+
+// Initialize canvas and required variables
+var canvas = document.getElementById("canvas"),
+        pitchDegrees = 0,
+        ctx = canvas.getContext("2d"), // Create canvas context
+        W = window.innerWidth, // Window's width
+        H = window.innerHeight, // Window's height
+        particles = [], // Array containing particles
+        ball = {}, // Ball object
+        paddles = [2], // Array containing two paddles
+        mouse = {}, // Mouse object to store it's current position
+        points = 0, // Varialbe to store points
+        particlesCount = 20, // Number of sparks when ball strikes the paddle
+        flag = 0, // Flag variable which is changed on collision
+        particlePos = {}, // Object to contain the position of collision
+        multipler = 1, // Varialbe to control the direction of sparks
+        init, // variable to initialize animation
+        paddleHit;
+
+// Add mousemove and mousedown events to the canvas
+canvas.addEventListener("mousemove", trackPosition, true);
+//canvas.addEventListener("mousedown", btnClick, true);
+
+// Initialise the collision sound
+collision = document.getElementById("collide");
+
+// Set the canvas's height and width to full screen
+canvas.width = W;
+canvas.height = H;
+
+// Function to paint canvas
+function paintCanvas() {
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, W, H);
+}
+
+// Function for creating paddles
+function Paddle(pos) {
+    // Height and width
+    this.h = 150;
+    this.w = 15;
+
+    // Paddle's position
+    this.y = H / 2 - this.h / 2;
+    this.x = (pos == "left") ? 0 : W - this.w;
+}
+
+// Push two new paddles into the paddles[] array
+paddles.push(new Paddle("left"));
+paddles.push(new Paddle("right"));
+
+// Ball object
+ball = {
+    x: W / 2,
+    y: H / 2,
+    r: 10,
+    c: "white",
+    vx: 16,
+    vy: 0.3,
+
+    // Function for drawing ball on canvas
+    draw: function () {
+        ctx.beginPath();
+        ctx.fillStyle = this.c;
+        ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2, false);
+        ctx.fill();
+    },
+
+    reset: function () {
+        this.x = W / 2;
+        this.y = H / 2;
+        this.vx = 16;
+        this.vy = 0.3;
+    },
+
+    move: function () {
+        this.x += this.vx;
+        this.y += this.vy;
+
+    }
+};
+
+// Function for creating particles object
+function createParticles(x, y, m) {
+    this.x = x || 0;
+    this.y = y || 0;
+
+    this.radius = 3.6;
+
+    this.vx = -1.5 + Math.random() * 3;
+    this.vy = m * Math.random() * 1.5;
+}
+
+// Draw everything on canvas
+function draw() {
+    paintCanvas();
+    for (var i = 0; i < paddles.length; i++) {
+        p = paddles[i];
+
+        ctx.fillStyle = "white";
+        ctx.fillRect(p.x, p.y, p.w, p.h);
+    }
+
+    ball.draw();
+    update();
+}
+
+// Function to increase speed after every 5 points
+function increaseSpd() {
+    if (points % 5 == 0) {
+        if (Math.abs(ball.vx) < 16) {
+            ball.vx += (ball.vx < 0) ? -1 : 1;
+            ball.vy += (ball.vy < 0) ? -2 : 2;
+        }
+    }
+}
+
+// Track the position of mouse cursor
+function trackPosition(e) {
+    mouse.x = e.pageX;
+    mouse.y = e.pageY;
+}
+
+// Function to update positions, score and everything.
+// Basically, the main game logic is defined here
+function update() {
+
+    updateScore();
+
+//    // Move the paddles on mouse move
+//    if (mouse.x && mouse.y) {
+//        for (var i = 1; i < paddles.length; i++) {
+//            p = paddles[i];
+////            p.y = mouse.y - p.h / 2;
+//            p.y = (H - pitchDegrees) - p.h / 2;
+//        }
+//    }
+
+    // Move the ball
+    ball.move();
+
+    // Collision with paddles
+    p1 = paddles[1];
+    p2 = paddles[2];
+
+    // If the ball strikes with paddles,
+    // invert the x-velocity vector of ball,
+    // increment the points, play the collision sound,
+    // save collision's position so that sparks can be
+    // emitted from that position, set the flag variable,
+    // and change the multiplier
+    if (collides(ball, p1)) {
+        collideAction(ball, p1);
+    }
+
+    else if (collides(ball, p2)) {
+        collideAction(ball, p2);
+    }
+
+    else {
+        // Collide with walls. If the ball hits the left/right,
+        // walls, run gameOver() function
+        if (ball.x + ball.r > W) {
+            ball.x = W - ball.r; // TODO: Unnecessary
+            gameOver();
+        }
+
+        else if (ball.x < 0) {
+            ball.x = ball.r; // TODO: Unnecessary
+            gameOver();
+        }
+
+        // If ball strikes the horizontal walls, invert the
+        // y-velocity vector of ball
+        if (ball.y + ball.r > H) {
+            ball.vy = -ball.vy;
+            ball.y = H - ball.r;
+        }
+
+        else if (ball.y - ball.r < 0) {
+            ball.vy = -ball.vy;
+            ball.y = ball.r;
+        }
+    }
+
+
+    // If flag is set, push the particles
+    if (flag == 1) {
+        for (var k = 0; k < particlesCount; k++) {
+            particles.push(new createParticles(particlePos.x, particlePos.y, multiplier));
+        }
+    }
+
+    // Emit particles/sparks
+    emitParticles();
+
+    // reset flag
+    flag = 0;
+}
+
+//Function to check collision between ball and one of
+//the paddles
+function collides(b, p) {
+    if (b.y + ball.r >= p.y && b.y - ball.r <= p.y + p.h) {
+        if (b.x >= (p.x - p.w) && p.x > 0) {
+            paddleHit = 1;
+            return true;
+        }
+
+        else if (b.x <= p.w && p.x == 0) {
+            paddleHit = 2;
+            return true;
+        }
+
+        else {
+            return false;
+        }
+    }
+}
+
+//Do this when collides == true
+function collideAction(ball, p) {
+    ball.vx = -ball.vx;
+
+    if (paddleHit == 1) {
+        ball.x = p.x - p.w;
+        particlePos.x = ball.x + ball.r;
+        multiplier = -1;
+    }
+
+    else if (paddleHit == 2) {
+        ball.x = p.w + ball.r;
+        particlePos.x = ball.x - ball.r;
+        multiplier = 1;
+    }
+
+    points++;
+    increaseSpd();
+
+    collision.play();
+    if (collision) {
+        if (points > 0) {
+            collision.pause();
+        }
+
+        collision.currentTime = 0;
+        collision.play();
+    }
+
+    particlePos.y = ball.y;
+    flag = 1;
+}
+
+// Function for emitting particles
+function emitParticles() {
+    for (var j = 0; j < particles.length; j++) {
+        var par = particles[j];
+
+        ctx.beginPath();
+        ctx.fillStyle = "white";
+        if (par.radius > 0) {
+            ctx.arc(par.x, par.y, par.radius, 0, Math.PI * 2, false);
+        }
+        ctx.fill();
+
+        par.x += par.vx;
+        par.y += par.vy;
+
+        // Reduce radius so that the particles die after a few seconds
+        par.radius = Math.max(par.radius - 0.05, 0.0);
+
+    }
+}
+
+// Function for updating score
+function updateScore() {
+    ctx.fillStlye = "white";
+    ctx.font = "16px Arial, sans-serif";
+    ctx.textAlign = "left";
+    ctx.textBaseline = "top";
+    ctx.fillText("Score: " + points, 20, 20);
+}
+
+// Function to run when the game overs
+function gameOver() {
+    ball.reset();
+    points = 0;
+}
+
+// Function for running the whole animation
+function animloop() {
+    window.requestAnimationFrame(animloop);
+    draw();
+}
+
+animloop();
+
+
+</script>
+
+</body>
+

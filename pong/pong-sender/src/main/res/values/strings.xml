@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Pong</string>
-    <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="media_route_menu_title">Chromecast</string>
-    <string name="app_id">2E0E7593</string>
+    <string name="app_id">AADBCC97</string>
     <string name="namespace">urn:x-cast:no.scienta.pong</string>
 </resources>

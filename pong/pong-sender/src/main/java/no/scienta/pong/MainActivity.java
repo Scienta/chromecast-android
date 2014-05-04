@@ -34,10 +34,6 @@ public class MainActivity extends ActionBarActivity {
         final TextView azimuthView = (TextView) findViewById(R.id.azimuthView);
         final TextView rollView = (TextView) findViewById(R.id.rollView);
 
-
-//        ActionBar actionBar = getSupportActionBar();
-//		actionBar.setBackgroundDrawable(new ColorDrawable(android.R.color.transparent));
-
         final String applicationId = getResources().getString(R.string.app_id);
         final String namespace = getResources().getString(R.string.namespace);
 
@@ -69,9 +65,9 @@ public class MainActivity extends ActionBarActivity {
                 rollView.setText("Roll " + Math.round(roll));
                 azimuthView.setText("Azi " + Math.round(azimuth));
 
-                if (castSession != null && MainActivity.this.pitchDegrees != pitchDegrees){
+                if (castSession != null && MainActivity.this.pitchDegrees != newPitchDegrees) {
                     MainActivity.this.pitchDegrees = newPitchDegrees;
-                    castSession.sendMessage("{pitch: " + newPitchDegrees + "}");
+                    castSession.sendMessage("{\"pitch\": " + newPitchDegrees + "}");
                 }
             }
         };
