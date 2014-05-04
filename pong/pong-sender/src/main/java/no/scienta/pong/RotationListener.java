@@ -7,10 +7,7 @@ import android.hardware.SensorManager;
 
 public abstract class RotationListener implements SensorEventListener {
 
-    private static final float RADIANS_TO_DEGREES = (float) (180.0 / Math.PI);
     private final SensorManager sensorManager;
-    private float[] magneticFieldValues;
-    private float[] accelerationValues;
     private final float[] rotationMatrix = new float[9];
 
 
@@ -19,8 +16,7 @@ public abstract class RotationListener implements SensorEventListener {
     }
 
     public void start() {
-        sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_UI);
-        sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD), SensorManager.SENSOR_DELAY_UI);
+        sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR), SensorManager.SENSOR_DELAY_UI);
     }
 
     public void stop() {
@@ -33,35 +29,19 @@ public abstract class RotationListener implements SensorEventListener {
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        switch (event.sensor.getType()) {
-            case Sensor.TYPE_MAGNETIC_FIELD:
-                magneticFieldValues = event.values.clone();
-                break;
-            case Sensor.TYPE_ACCELEROMETER:
-                accelerationValues = event.values.clone();
-                break;
-        }
 
-        if (magneticFieldValues != null && accelerationValues != null) {
-            SensorManager.getRotationMatrix(rotationMatrix, null, accelerationValues, magneticFieldValues);
+        float[] orientation = new float[3];
 
-            // Correct if screen is in Landscape
-            // TODO
-//            float[] outR = new float[9];
-//            SensorManager.remapCoordinateSystem(rotationMatrix, SensorManager.AXIS_X,SensorManager.AXIS_Z, outR);
+        // Convert the rotation-vector to a 4x4 matrix.
+        SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values);
+        SensorManager.getOrientation(rotationMatrix, orientation);
 
-            float[] orientation = new float[3];
-            SensorManager.getOrientation(rotationMatrix, orientation);
+        float azimuth = (float) Math.toDegrees(orientation[0]);
+        float pitch = (float) Math.toDegrees(orientation[1]);
+        float roll = (float) Math.toDegrees(orientation[2]);
 
+        onRotationChanged(pitch, roll, azimuth);
 
-            float azimuth = orientation[0] * RADIANS_TO_DEGREES;
-            float pitch = orientation[1] * RADIANS_TO_DEGREES;
-            float roll = orientation[2] * RADIANS_TO_DEGREES;
-
-            magneticFieldValues = null;
-            accelerationValues = null;
-            onRotationChanged(pitch, roll, azimuth);
-        }
     }
 
     protected abstract void onRotationChanged(float pitch, float roll, float azimuth);

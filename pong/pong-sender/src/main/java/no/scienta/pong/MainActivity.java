@@ -34,7 +34,10 @@ public class MainActivity extends ActionBarActivity {
         final TextView pitchView = (TextView) findViewById(R.id.pitchView);
         final TextView azimuthView = (TextView) findViewById(R.id.azimuthView);
         final TextView rollView = (TextView) findViewById(R.id.rollView);
+
         final ProgressBar pitchProgress = (ProgressBar) findViewById(R.id.pitchProgress);
+        final ProgressBar rollProgress = (ProgressBar) findViewById(R.id.rollProgress);
+        final ProgressBar azimuthProgress = (ProgressBar) findViewById(R.id.azimuthProgress);
 
         final String applicationId = getResources().getString(R.string.app_id);
         final String namespace = getResources().getString(R.string.namespace);
@@ -63,10 +66,16 @@ public class MainActivity extends ActionBarActivity {
             @Override
             protected void onRotationChanged(float pitch, float roll, float azimuth) {
                 int newPitchDegrees = Math.round(pitch);
+                int newRollDegrees = Math.round(roll);
+                int newAzimuthDegrees = Math.round(azimuth);
+
                 pitchView.setText("Pitch " + newPitchDegrees);
-                rollView.setText("Roll " + Math.round(roll));
-                azimuthView.setText("Azi " + Math.round(azimuth));
+                rollView.setText("Roll " + newRollDegrees);
+                azimuthView.setText("Azi " + newAzimuthDegrees);
+
                 pitchProgress.setProgress(newPitchDegrees + 90);
+                rollProgress.setProgress(newRollDegrees + 90);
+                azimuthProgress.setProgress(newAzimuthDegrees + 180);
 
                 if (castSession != null && MainActivity.this.pitchDegrees != newPitchDegrees) {
                     MainActivity.this.pitchDegrees = newPitchDegrees;

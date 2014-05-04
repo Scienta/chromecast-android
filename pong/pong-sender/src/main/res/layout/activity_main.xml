@@ -1,52 +1,54 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             xmlns:tools="http://schemas.android.com/tools"
-             android:id="@+id/container"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent"
-             tools:context="no.scienta.pong.MainActivity"
-             tools:ignore="MergeRootFrame">
+<LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:orientation="vertical"
+        xmlns:android="http://schemas.android.com/apk/res/android">
 
     <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="Pitch"
-            android:id="@+id/pitchView"
-            android:layout_gravity="left|center_vertical"
-            android:layout_margin="10dip"/>
-
-    <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="Azi"
-            android:id="@+id/azimuthView"
-            android:layout_gravity="center"
-            android:layout_margin="10dip"/>
-
-    <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="80dip"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:text="Roll"
             android:id="@+id/rollView"
-            android:layout_gravity="right|center_vertical"
             android:layout_margin="10dip"/>
 
-    <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:layout_gravity="center_horizontal|bottom"
-            android:weightSum="1">
+    <ProgressBar
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="20dip"
+            android:id="@+id/rollProgress"
+            android:max="180"
+            android:indeterminate="false"/>
 
-        <ProgressBar
-                style="?android:attr/progressBarStyleHorizontal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/pitchProgress"
-                android:layout_gravity="bottom"
-                android:max="180"/>
-    </LinearLayout>
+    <TextView
+            android:layout_width="80dip"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Pitch"
+            android:id="@+id/pitchView"
+            android:layout_margin="10dip"/>
 
-</FrameLayout>
+    <ProgressBar
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="20dip"
+            android:id="@+id/pitchProgress"
+            android:max="180"/>
+
+    <TextView
+            android:layout_width="80dip"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Azi"
+            android:id="@+id/azimuthView"
+            android:layout_margin="10dip"/>
+
+    <ProgressBar
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="20dip"
+            android:id="@+id/azimuthProgress"
+            android:max="180"
+            android:indeterminate="false"/>
+
+</LinearLayout>
