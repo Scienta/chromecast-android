@@ -54,8 +54,10 @@ window.onload = function () {
         console.log(pitchDegrees);
 
         // Move the paddles on mouse move
+        var offset = Math.min(Math.max(0, -pitchDegrees), 60); // [0, 60]
+        offset *= H / 60; // [0, H]
         for (var i = 1; i < paddles.length; i++) {
-            paddles[i].y = (H/2 + pitchDegrees) - paddles[i].h / 2;
+            paddles[i].y = (H - offset) - paddles[i].h / 2;
         }
     };
 
@@ -359,6 +361,7 @@ function animloop() {
 }
 
 animloop();
+
 
 
 </script>

@@ -1,10 +1,10 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/container"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="no.scienta.pong.MainActivity"
-    tools:ignore="MergeRootFrame" >
+             xmlns:tools="http://schemas.android.com/tools"
+             android:id="@+id/container"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             tools:context="no.scienta.pong.MainActivity"
+             tools:ignore="MergeRootFrame">
 
     <TextView
             android:layout_width="wrap_content"
@@ -32,4 +32,21 @@
             android:id="@+id/rollView"
             android:layout_gravity="right|center_vertical"
             android:layout_margin="10dip"/>
+
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_gravity="center_horizontal|bottom"
+            android:weightSum="1">
+
+        <ProgressBar
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/pitchProgress"
+                android:layout_gravity="bottom"
+                android:max="180"/>
+    </LinearLayout>
+
 </FrameLayout>

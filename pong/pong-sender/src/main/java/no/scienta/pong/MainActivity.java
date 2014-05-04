@@ -12,6 +12,7 @@ import android.support.v7.app.MediaRouteActionProvider;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import no.scienta.pong.cast.CastSession;
 import no.scienta.pong.cast.DiscoveryAndSelectHandler;
@@ -33,6 +34,7 @@ public class MainActivity extends ActionBarActivity {
         final TextView pitchView = (TextView) findViewById(R.id.pitchView);
         final TextView azimuthView = (TextView) findViewById(R.id.azimuthView);
         final TextView rollView = (TextView) findViewById(R.id.rollView);
+        final ProgressBar pitchProgress = (ProgressBar) findViewById(R.id.pitchProgress);
 
         final String applicationId = getResources().getString(R.string.app_id);
         final String namespace = getResources().getString(R.string.namespace);
@@ -64,6 +66,7 @@ public class MainActivity extends ActionBarActivity {
                 pitchView.setText("Pitch " + newPitchDegrees);
                 rollView.setText("Roll " + Math.round(roll));
                 azimuthView.setText("Azi " + Math.round(azimuth));
+                pitchProgress.setProgress(newPitchDegrees + 90);
 
                 if (castSession != null && MainActivity.this.pitchDegrees != newPitchDegrees) {
                     MainActivity.this.pitchDegrees = newPitchDegrees;
