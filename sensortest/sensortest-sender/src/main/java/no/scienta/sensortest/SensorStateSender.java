@@ -6,23 +6,19 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 
 public abstract class SensorStateSender implements SensorEventListener {
-	private final SensorManager mSensorManager;
-    private final Sensor mAccelerometer;
-    float aa=0;
-    float bb=0;
-    
-    
+	private final SensorManager sensorManager;
+    private final float[] r = new float[9];
+
     public SensorStateSender(SensorManager sensorManager) {
-    	this.mSensorManager=sensorManager;
-        this.mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+    	this.sensorManager=sensorManager;
 	}
     
     public void start() {
-    	mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+    	sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR), SensorManager.SENSOR_DELAY_UI);
     }
     
     public void stop() {
-    	mSensorManager.unregisterListener(this);
+    	sensorManager.unregisterListener(this);
     }
     
     @Override
@@ -32,20 +28,20 @@ public abstract class SensorStateSender implements SensorEventListener {
     
     @Override
     public void onSensorChanged(SensorEvent event) {
-    	final float a = event.values[0];
-    	final float b = event.values[1];
-    	//final float c = event.values[2];
-    	aa+=a;
-    	bb+=b;
-    	
-    	aa*=0.95f;
-    	bb*=0.95f;
-    	
-    	int x=((int)(aa*10f)+300) % 600;
-    	int y=((int)(bb*10f)+300) % 600;
-    	
-    	String msg="{\"x\": "+x+",\"y\":"+y+"}";
-    	send(msg);
+        SensorManager.getRotationMatrixFromVector(r, event.values);
+        String msg="{"+
+                "\"r0\": "+r[0]+"," +
+                "\"r1\": "+r[1]+"," +
+                "\"r2\": "+r[2]+"," +
+                "\"r3\": "+r[3]+"," +
+                "\"r4\": "+r[4]+"," +
+                "\"r5\": "+r[5]+"," +
+                "\"r6\": "+r[6]+"," +
+                "\"r7\": "+r[7]+"," +
+                "\"r8\": "+r[8]+"}";
+        //System.out.println("msg="+msg);
+
+                send(msg);
     }
     
     protected abstract void send(String msg);
