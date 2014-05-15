@@ -16,6 +16,7 @@ import android.support.v7.app.MediaRouteActionProvider;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.google.android.gms.cast.Cast.MessageReceivedCallback;
 import com.google.android.gms.cast.CastDevice;
@@ -144,4 +145,10 @@ public class MainActivity extends ActionBarActivity {
 			return null;
 		}
 	}
+
+    public void resetOrientation(View view) {
+        if (sensorStateSender!=null) {
+            sensorStateSender.updateCalibration();
+        }
+    }
 }

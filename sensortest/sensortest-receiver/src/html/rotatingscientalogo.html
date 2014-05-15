@@ -1,0 +1,159 @@
+<html>
+ <head>
+  <script type="text/javascript"
+     src="https://www.gstatic.com/cast/sdk/libs/receiver/2.0.0/cast_receiver.js">
+  </script>
+ </head>
+ <body>
+
+  <script type="text/javascript" src="https://googledrive.com/host/0BxWiy6YBTHXXS0M3X0dubnpjMUE/jquery-1.11.0.min.js"></script>
+ 
+  <script type="text/javascript" 
+     src="https://googledrive.com/host/0BxWiy6YBTHXXS0M3X0dubnpjMUE/scientalines_hi_face.js">
+  </script>
+
+  <script type="text/javascript" 
+     src="https://googledrive.com/host/0BxWiy6YBTHXXS0M3X0dubnpjMUE/vectormath.js">
+  </script>
+ 
+  <script type="application/x-javascript">
+
+
+
+   var rot=unitMatrix;
+
+   var a=0.01;
+   var b=0.013;
+
+   var pi=3.14159265;
+
+   var correction=rotX(unitMatrix,-pi/2);   
+
+   rot=multiply(correction,rot);   
+ 
+   var log="messages";
+
+   function draw(id) {
+     var canvas = document.getElementById(id);
+     if (canvas.getContext) {
+       var ctx = canvas.getContext("2d");
+       var cx=canvas.width;
+       var cy=canvas.height;
+   
+       var s=100;    
+       ctx.clearRect(0,0,cx,cy);
+
+       ctx.strokeStyle = 'rgb(200,200,0)';
+       ctx.fillStyle = 'rgb(200,200,200)';
+       ctx.fillText(log, 100, 700);
+
+       // Draw the lines
+       ctx.beginPath();
+       for (var i=0;i<lines.length;i++) {
+            drawOneLine(ctx,lines[i]);
+       }
+       ctx.stroke();
+
+       //rot=animRot(rot);
+     }
+  }
+
+  function animRot(r) {
+    return rotZ(rotY(rotZ(r,0.002),0.003),0.001);
+  }
+
+  function drawOneLine(ctx,line) {
+    drawLine(ctx,line[0],line[1]);
+  }
+
+  function drawLine(ctx, vWorld1, vWorld2) {
+     var xFlip=[[-1,0,0],
+                [0,1,0],
+                [0,0,1]];
+
+
+     var v1=transform(multiply(rot,xFlip),vWorld1);
+     var v2=transform(multiply(rot,xFlip),vWorld2);
+
+     // Set distance
+     v1[2]=v1[2]+3;
+     v2[2]=v2[2]+3;
+
+     var pers1=2/(2+v1[2]);
+     var pers2=2/(2+v2[2]);
+     
+     ctx.moveTo(640-v1[0]*300*pers1,360+v1[1]*300*pers1);
+     ctx.lineTo(640-v2[0]*300*pers2,360+v2[1]*300*pers2);
+  }
+
+
+   
+  function setupCast() {
+       log="setting up cast";
+   
+       cast.receiver.logger.setLevelValue(0);
+       
+       window.castReceiverManager = cast.receiver.CastReceiverManager.getInstance();
+       
+       
+       castReceiverManager.onReady = function(event) {
+         window.castReceiverManager.setApplicationState("Application status is ready...");
+       };
+       
+       castReceiverManager.onSenderConnected = function(event) {
+         console.log('Received Sender Connected event: ' + event.data);
+         console.log(window.castReceiverManager.getSender(event.data).userAgent);
+         log="connected";
+       };
+               
+       castReceiverManager.onSenderDisconnected = function(event) {
+         console.log('Received Sender Disconnected event: ' + event.data);
+         if (window.castReceiverManager.getSenders().length == 0) {
+           log="disconnected";
+           window.close();
+         }
+       };
+       
+       castReceiverManager.onSystemVolumeChanged = function(event) {
+         console.log('Received System Volume Changed event: ' + event.data['level'] + ' ' + event.data['muted']);
+       };
+       
+       window.messageBus = window.castReceiverManager.getCastMessageBus('urn:x-cast:no.scienta.rotmatrix');
+       
+       window.messageBus.onMessage = function(event) {
+           log="Got event: "+event.data;
+           rot[0][0]=jQuery.parseJSON(event.data).r0;
+           rot[0][1]=jQuery.parseJSON(event.data).r1;
+           rot[0][2]=jQuery.parseJSON(event.data).r2;
+           rot[1][0]=jQuery.parseJSON(event.data).r3;
+           rot[1][1]=jQuery.parseJSON(event.data).r4;
+           rot[1][2]=jQuery.parseJSON(event.data).r5;
+           rot[2][0]=jQuery.parseJSON(event.data).r6;
+           rot[2][1]=jQuery.parseJSON(event.data).r7;
+           rot[2][2]=jQuery.parseJSON(event.data).r8;
+
+           rot=multiply(correction,rot);
+       }
+       
+       castReceiverManager.start({maxInactivity: 600});        
+       
+       log="ready";
+   }
+
+  window.onload = function() {
+    setupCast();
+  }
+
+  function animLoop() {
+    window.requestAnimationFrame(animLoop);
+    draw('canvas');
+  }
+
+  animLoop();
+
+
+ </script>
+  <canvas id="canvas" width="1280" height="720"/></td>
+</body>
+</html>
+
