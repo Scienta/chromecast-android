@@ -3,9 +3,16 @@
   <script type="text/javascript"
      src="https://www.gstatic.com/cast/sdk/libs/receiver/2.0.0/cast_receiver.js">
   </script>
+    <style>
+        body {
+        padding: 0;
+        margin: 0;
+        overflow: hidden;
+        }
+    </style>
  </head>
  <body>
-
+  <canvas id="canvas"></canvas>
   <script type="text/javascript" src="https://googledrive.com/host/0BxWiy6YBTHXXS0M3X0dubnpjMUE/jquery-1.11.0.min.js"></script>
  
   <script type="text/javascript" 
@@ -18,7 +25,11 @@
  
   <script type="application/x-javascript">
 
+   var canvas = document.getElementById("canvas");
+   canvas.width=window.innerWidth;
+   canvas.height=window.innerHeight;
 
+   var connected=0;
 
    var rot=unitMatrix;
 
@@ -54,7 +65,9 @@
        }
        ctx.stroke();
 
-       //rot=animRot(rot);
+       if (connected==0) {
+         rot=animRot(rot);
+       }
      }
   }
 
@@ -104,6 +117,7 @@
          console.log('Received Sender Connected event: ' + event.data);
          console.log(window.castReceiverManager.getSender(event.data).userAgent);
          log="connected";
+         connected=1;
        };
                
        castReceiverManager.onSenderDisconnected = function(event) {
@@ -111,6 +125,7 @@
          if (window.castReceiverManager.getSenders().length == 0) {
            log="disconnected";
            window.close();
+           connected=0;
          }
        };
        
@@ -153,7 +168,6 @@
 
 
  </script>
-  <canvas id="canvas" width="1280" height="720"/></td>
 </body>
 </html>
 
