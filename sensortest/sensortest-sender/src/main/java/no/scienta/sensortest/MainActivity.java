@@ -1,11 +1,11 @@
 package no.scienta.sensortest;
 
-import java.util.Timer;
-import java.util.TimerTask;
 
 import no.scienta.sensortest.cast.CastSession;
 import no.scienta.sensortest.cast.DiscoveryAndSelectHandler;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.graphics.drawable.ColorDrawable;
 import android.hardware.SensorManager;
 import android.os.Bundle;
@@ -22,7 +22,6 @@ import com.google.android.gms.cast.Cast.MessageReceivedCallback;
 import com.google.android.gms.cast.CastDevice;
 
 public class MainActivity extends ActionBarActivity {
-
 	private static final String TAG = MainActivity.class.getSimpleName();
 
 	private DiscoveryAndSelectHandler discoveryAndSelectHandler;
@@ -58,10 +57,9 @@ public class MainActivity extends ActionBarActivity {
 				}
 			}
 		};
-		
-		
+
+        // Create sensor state sender
 		sensorStateSender=new SensorStateSender((SensorManager)getSystemService(SENSOR_SERVICE)) {
-			
 			@Override
 			protected void send(String msg) {
 				if (castSession!=null && !castSession.isClosed()) {
@@ -69,8 +67,7 @@ public class MainActivity extends ActionBarActivity {
 					castSession.sendMessage(msg);
 				}
 			}
-		};		
-		Log.d(TAG, "Heisann");
+		};
 	}
 		
 	@Override
@@ -127,7 +124,6 @@ public class MainActivity extends ActionBarActivity {
 				@Override
 				protected void onClosed(CloseReason reason) {
 					Log.i(TAG,"onClosedSession");
-					
 				}
 				
 				@Override
@@ -145,6 +141,12 @@ public class MainActivity extends ActionBarActivity {
 			return null;
 		}
 	}
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+    }
 
     public void resetOrientation(View view) {
         if (sensorStateSender!=null) {

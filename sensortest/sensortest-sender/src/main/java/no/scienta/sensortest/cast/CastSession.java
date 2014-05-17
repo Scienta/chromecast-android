@@ -22,14 +22,10 @@ import com.google.android.gms.common.api.Status;
 
 public abstract class CastSession {
 	private final String TAG="CastSession";
-//	private final CastDevice device;
-//	private final String applicationId;
 	private final String namespace;
 	private GoogleApiClient apiClient;
 	
 	public CastSession(final CastDevice device, final String applicationId, final String namespace, final Context context) {
-//		this.device=device;
-//		this.applicationId=applicationId;
 		this.namespace=namespace;
 		
 		final Cast.Listener castListener = new Cast.Listener() {
@@ -37,7 +33,6 @@ public abstract class CastSession {
 			public void onApplicationDisconnected(int errorCode) {
 				Log.d(TAG, "Application disconnected");
 				onClose(CloseReason.APP_DISCONNECTED);
-				// Local teardown?
 			}
 		};
 		
@@ -46,7 +41,6 @@ public abstract class CastSession {
 			public void onConnectionFailed(ConnectionResult result) {
 				Log.e(TAG, "ConnectionFailed ");
 				onClose(CloseReason.CONNECTION_FAILED);
-				// Local teardown?
 			}
 		};
 		
