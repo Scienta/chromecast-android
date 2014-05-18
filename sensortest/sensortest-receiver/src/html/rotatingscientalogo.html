@@ -9,6 +9,7 @@
         margin: 0;
         overflow: hidden;
         background-image:url('https://googledrive.com/host/0BxWiy6YBTHXXS0M3X0dubnpjMUE/oceanbg.png');
+	background-size: 100%;
         }
     </style>
  </head>
@@ -26,68 +27,53 @@
  
   <script type="application/x-javascript">
 
-   var canvas = document.getElementById("canvas");
-   canvas.width=window.innerWidth;
-   canvas.height=window.innerHeight;
-
    var connected=0;
-
    var rot=unitMatrix;
-
-   var a=0.01;
-   var b=0.013;
-
    var pi=3.14159265;
-
    var correction=rotX(unitMatrix,-pi/2);   
-
    rot=multiply(correction,rot);   
  
-   var log="messages";
+   var log="message";
 
    function draw(id) {
      var canvas = document.getElementById(id);
      if (canvas.getContext) {
        var ctx = canvas.getContext("2d");
-       var cx=canvas.width;
-       var cy=canvas.height;
+       var w=canvas.width;
+       var h=canvas.height;
    
-       var s=100;    
-       ctx.clearRect(0,0,cx,cy);
+       ctx.clearRect(0,0,w,h);
 
-       ctx.strokeStyle = 'rgb(200,200,0)';
-       ctx.fillStyle = 'rgb(200,200,200)';
-       ctx.fillText(log, 100, 700);
+       ctx.strokeStyle = 'rgb(180,180,250)';
+//       ctx.fillStyle = 'rgb(200,200,200)';
+       ctx.fillText(log, 100, h-20);
+      
 
        // Draw the lines
+       ctx.lineWidth=1;
        ctx.beginPath();
        for (var i=0;i<lines.length;i++) {
-            drawOneLine(ctx,lines[i]);
+            var vertexFrom=lines[i][0];
+            var vertexTo=lines[i][1];
+            drawLine(ctx,vertexFrom,vertexTo,w,h);
+
        }
        ctx.stroke();
 
+       // Rotation for running in browser
        if (connected==0) {
-         rot=animRot(rot);
+         rot=rotZ(rotY(rotZ(rot,0.002),0.003),0.001);
        }
      }
   }
 
-  function animRot(r) {
-    return rotZ(rotY(rotZ(r,0.002),0.003),0.001);
-  }
-
-  function drawOneLine(ctx,line) {
-    drawLine(ctx,line[0],line[1]);
-  }
-
-  function drawLine(ctx, vWorld1, vWorld2) {
+  function drawLine(ctx, vertexFrom, vertexTo,w,h) {
      var xFlip=[[-1,0,0],
                 [0,1,0],
                 [0,0,1]];
 
-
-     var v1=transform(multiply(rot,xFlip),vWorld1);
-     var v2=transform(multiply(rot,xFlip),vWorld2);
+     var v1=transform(multiply(rot,xFlip),vertexFrom);
+     var v2=transform(multiply(rot,xFlip),vertexTo);
 
      // Set distance
      v1[2]=v1[2]+3;
@@ -96,8 +82,8 @@
      var pers1=2/(2+v1[2]);
      var pers2=2/(2+v2[2]);
      
-     ctx.moveTo(640-v1[0]*300*pers1,360+v1[1]*300*pers1);
-     ctx.lineTo(640-v2[0]*300*pers2,360+v2[1]*300*pers2);
+     ctx.moveTo(w/2-v1[0]*w/4*pers1,h/2+v1[1]*h/2*pers1);
+     ctx.lineTo(w/2-v2[0]*w/4*pers2,h/2+v2[1]*h/2*pers2);
   }
 
 
@@ -165,9 +151,12 @@
     draw('canvas');
   }
 
-  animLoop();
 
-
+   var canvas = document.getElementById("canvas");
+   canvas.width=window.innerWidth;
+   canvas.height=window.innerHeight;
+ 
+   animLoop();
  </script>
 </body>
 </html>
