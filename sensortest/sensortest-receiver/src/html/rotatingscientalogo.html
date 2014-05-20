@@ -18,7 +18,16 @@
   <script type="text/javascript" src="https://googledrive.com/host/0BxWiy6YBTHXXS0M3X0dubnpjMUE/jquery-1.11.0.min.js"></script>
  
   <script type="text/javascript" 
-     src="https://googledrive.com/host/0BxWiy6YBTHXXS0M3X0dubnpjMUE/scientalines_hi_face.js">
+     src="https://googledrive.com/host/0BxWiy6YBTHXXS0M3X0dubnpjMUE/lines_scienta.js">
+  </script>
+  <script type="text/javascript" 
+     src="https://googledrive.com/host/0BxWiy6YBTHXXS0M3X0dubnpjMUE/lines_android.js">
+  </script>
+  <script type="text/javascript" 
+     src="https://googledrive.com/host/0BxWiy6YBTHXXS0M3X0dubnpjMUE/lines_chromelogo.js">
+  </script>
+  <script type="text/javascript" 
+     src="https://googledrive.com/host/0BxWiy6YBTHXXS0M3X0dubnpjMUE/lines_cube.js">
   </script>
 
   <script type="text/javascript" 
@@ -27,13 +36,18 @@
  
   <script type="application/x-javascript">
 
+   var objects=[lines_scienta, lines_android, lines_chromelogo, lines_cube];
+
    var connected=0;
    var rot=unitMatrix;
    var pi=3.14159265;
    var correction=rotX(unitMatrix,-pi/2);   
    rot=multiply(correction,rot);   
- 
+
    var log="message";
+
+   var lines=objects[0];  // Scienta default
+   
 
    function draw(id) {
      var canvas = document.getElementById(id);
@@ -120,21 +134,22 @@
          console.log('Received System Volume Changed event: ' + event.data['level'] + ' ' + event.data['muted']);
        };
        
-       window.messageBus = window.castReceiverManager.getCastMessageBus('urn:x-cast:no.scienta.rotmatrix');
+       window.messageBus_rotmatrix = window.castReceiverManager.getCastMessageBus('urn:x-cast:no.scienta.rotmatrix');
        
-       window.messageBus.onMessage = function(event) {
+       window.messageBus_rotmatrix.onMessage = function(event) {
            log="Got event: "+event.data;
-           rot[0][0]=jQuery.parseJSON(event.data).r0;
-           rot[0][1]=jQuery.parseJSON(event.data).r1;
-           rot[0][2]=jQuery.parseJSON(event.data).r2;
-           rot[1][0]=jQuery.parseJSON(event.data).r3;
-           rot[1][1]=jQuery.parseJSON(event.data).r4;
-           rot[1][2]=jQuery.parseJSON(event.data).r5;
-           rot[2][0]=jQuery.parseJSON(event.data).r6;
-           rot[2][1]=jQuery.parseJSON(event.data).r7;
-           rot[2][2]=jQuery.parseJSON(event.data).r8;
-
+           var msg=jQuery.parseJSON(event.data);
+           rot[0][0]=msg.r0;
+           rot[0][1]=msg.r1;
+           rot[0][2]=msg.r2;
+           rot[1][0]=msg.r3;
+           rot[1][1]=msg.r4;
+           rot[1][2]=msg.r5;
+           rot[2][0]=msg.r6;
+           rot[2][1]=msg.r7;
+           rot[2][2]=msg.r8;
            rot=multiply(correction,rot);
+           lines=objects[msg.objectId % objects.length];
        }
        
        castReceiverManager.start({maxInactivity: 600});        

@@ -9,6 +9,7 @@ public abstract class SensorStateSender implements SensorEventListener {
 	private final SensorManager sensorManager;
     private final float[] r = new float[9];
     private float[] calibration=new float[]{1,0,0,0,1,0,0,0,1};
+
     private int objectId=0;
     private long lastSend=0;
 
@@ -31,6 +32,16 @@ public abstract class SensorStateSender implements SensorEventListener {
     
     @Override
     public synchronized void onSensorChanged(SensorEvent event) {
+        switch(event.sensor.getType()) {
+            case Sensor.TYPE_ROTATION_VECTOR: {
+                handleRotationEvent(event);
+                break;
+            }
+
+        }
+    }
+
+    private void handleRotationEvent(SensorEvent event) {
         long now=System.currentTimeMillis();
         if (now-lastSend<40) return;
         SensorManager.getRotationMatrixFromVector(r, event.values);
@@ -48,8 +59,8 @@ public abstract class SensorStateSender implements SensorEventListener {
                 "\"r7\": "+m[7]+"," +
                 "\"r8\": "+m[8]+"," +
                 "\"objectId\": "+objectId+"}";
-                send(msg);
-                lastSend=now;
+        send(msg);
+        lastSend=now;
     }
 
     private float[] matrixMultiply(float[] a, float[] b) {

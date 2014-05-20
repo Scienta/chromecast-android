@@ -162,8 +162,12 @@ public class MainActivity extends ActionBarActivity {
         selectObject(1);
     }
 
-    public void selectCube(View view) {
+    public void selectChromeLogo(View view) {
         selectObject(2);
+    }
+
+    public void selectCube(View view) {
+        selectObject(3);
     }
 
     public void selectObject(int objId) {
