@@ -133,7 +133,7 @@ public class MainActivity extends ActionBarActivity {
 				
 				@Override
 				protected MessageReceivedCallback createNewMessageReceiver() {
-					return null;
+                    return null;
 				}
 			};
 		} catch (Exception e) {
@@ -151,6 +151,24 @@ public class MainActivity extends ActionBarActivity {
     public void resetOrientation(View view) {
         if (sensorStateSender!=null) {
             sensorStateSender.updateCalibration();
+        }
+    }
+
+    public void selectLogo(View view) {
+        selectObject(0);
+    }
+
+    public void selectAndroid(View view) {
+        selectObject(1);
+    }
+
+    public void selectCube(View view) {
+        selectObject(2);
+    }
+
+    public void selectObject(int objId) {
+        if (sensorStateSender!=null) {
+            sensorStateSender.setObjectId(objId);
         }
     }
 }
